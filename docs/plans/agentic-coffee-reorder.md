@@ -1,6 +1,6 @@
 # Feature Implementation Plan: Agentic Coffee Reorder (v1)
 
-**Overall Progress:** `67%`
+**Overall Progress:** `100%`
 
 ## TLDR
 A weekend learning prototype. A Slack-style chat message ("we're out of coffee") triggers a Claude-powered shopping agent. It finds coffee across 3 mock merchants over **MCP**, checks out with **UCP**, proves authority with **AP2** mandates, and pays through a mock Stripe-style processor. A small web dashboard shows the chat and a live timeline of every protocol message so each step can be studied.
@@ -56,23 +56,32 @@ A weekend learning prototype. A Slack-style chat message ("we're out of coffee")
   - [x] 🟩 Policy check → `ok` / `needs_approval(reason)` / `reject`
   - [x] 🟩 Unit tests covering each policy branch (+ end-to-end protocol tests without Claude)
 
-- [ ] 🟥 **Step 7: Shopping agent (Claude)**
-  - [ ] 🟥 Tool-use loop with Sonnet 5.5 over the merchant MCP tools
-  - [ ] 🟥 Agent's MCP client logs every `tools/call` to the timeline; long tokens (mandates, JWTs) are held by code and given to Claude as short handles
-  - [ ] 🟥 Run parallel tool calls at the same time (Claude searches all 3 merchants in one turn)
-  - [ ] 🟥 Flow: parse request (incl. a deadline override) → gather offers → filter by deadline → rank by brand within budget → policy check → closed Checkout Mandate → closed Payment Mandate → processor → receipt
-  - [ ] 🟥 Over a limit → ask in chat → on approval, the user's key signs a one-time mandate for that checkout
-  - [ ] 🟥 Nothing arrives in time → relax the deadline to the earliest available → ask for approval
-  - [ ] 🟥 Log each Claude decision and its reasoning to the timeline
+- [x] 🟩 **Step 7: Shopping agent (Claude)**
+  - [x] 🟩 Tool-use loop with Sonnet 5.5 over the merchant MCP tools
+  - [x] 🟩 Agent's MCP client logs every `tools/call` to the timeline; long tokens (mandates, JWTs) are held by code and given to Claude as short handles
+  - [x] 🟩 Run parallel tool calls at the same time (Claude searches all 3 merchants in one turn)
+  - [x] 🟩 Flow: parse request (incl. a deadline override) → gather offers → filter by deadline → rank by brand within budget → policy check → closed Checkout Mandate → closed Payment Mandate → processor → receipt
+  - [x] 🟩 Over a limit → ask in chat → on approval, the user's key signs a one-time mandate for that checkout
+  - [x] 🟩 Nothing arrives in time → relax the deadline to the earliest available → ask for approval
+  - [x] 🟩 Log each Claude decision and its reasoning to the timeline
 
-- [ ] 🟥 **Step 8: Dashboard**
-  - [ ] 🟥 Slack-style chat panel (user messages, agent replies, approve/deny buttons)
-  - [ ] 🟥 Live protocol timeline via SSE, color-coded by protocol, with expandable payloads
-  - [ ] 🟥 Mandate panel: limits, spend this month, brand ranking
+- [x] 🟩 **Step 8: Dashboard**
+  - [x] 🟩 Slack-style chat panel (user messages, agent replies, approve/deny buttons)
+  - [x] 🟩 Live protocol timeline via SSE, color-coded by protocol, with expandable payloads
+  - [x] 🟩 Mandate panel: limits, spend this month, brand ranking
 
-- [ ] 🟥 **Step 9: Demo scenarios + README**
-  - [ ] 🟥 Happy path: preferred brand, under both caps, on time
-  - [ ] 🟥 Over $40 per order → approval
-  - [ ] 🟥 Under $40 but over the $80 month → approval
-  - [ ] 🟥 Nothing within 3 days → relaxed deadline → approval
-  - [ ] 🟥 README: setup, run, and a walkthrough of what to watch in each scenario
+- [x] 🟩 **Step 9: Demo scenarios + README**
+  - [x] 🟩 Happy path: preferred brand, under both caps, on time
+  - [x] 🟩 Over $40 per order → approval
+  - [x] 🟩 Under $40 but over the $80 month → approval
+  - [x] 🟩 Nothing within 3 days → relaxed deadline → approval
+  - [x] 🟩 README: setup, run, and a walkthrough of what to watch in each scenario
+
+## Verification (2026-10-29)
+- 21 automated tests pass (policy + end-to-end protocol flows, no Claude)
+- Live with Claude Sonnet 5.5: scenarios 1 and 4 from the CLI; scenarios 2 (Deny) and 3 (Approve) in the dashboard
+- Dashboard checked at desktop and 375px phone width
+
+## Follow-ups noticed
+- Claude occasionally misstates budget arithmetic in its chat reply (said the budget was "used up" at $70/$80); the decision was right. Candidate for an eval.
+- Claude handles thinking blocks: they're echoed back with signatures and shown on the timeline.

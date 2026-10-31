@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coffee Refiller</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --panel: #ffffff; --ink: #1d1c1a; --muted: #6f6b64; --line: #e4e1da; --soft: #f0eee9;
+    --accent: #4a3728;
+    --chat: #6f6b64; --claude: #c2622d; --mcp: #2f6fd6; --ucp: #1f8a5b; --ap2: #7a4fd0; --stripe: #635bff; --policy: #b7791f;
+    --ok: #1f8a5b; --warn: #b7791f; --bad: #c0392b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161513; --panel: #1f1e1b; --ink: #ece9e3; --muted: #a39e95; --line: #34322d; --soft: #2a2925; --accent: #d9b99b;
+      --chat: #a39e95; --claude: #e8875a; --mcp: #6aa1ff; --ucp: #4cc38a; --ap2: #a987f0; --stripe: #8f89ff; --policy: #e0a845; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 16px; margin: 0; }
+  header .sub { color: var(--muted); font-size: 13px; }
+  header .spacer { flex: 1; }
+  button { font: inherit; cursor: pointer; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 5px 10px; }
+  button:hover { background: var(--soft); }
+  button:disabled { opacity: .5; cursor: default; }
+  .layout { display: grid; grid-template-columns: minmax(320px, 420px) 1fr; height: calc(100vh - 53px); }
+  .layout > section { min-width: 0; }  /* let long ids wrap instead of widening the grid */
+  .ev > summary > span:last-child { overflow-wrap: anywhere; }
+  @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); height: auto; } .timeline { min-height: 70vh; } }
+  @media (max-width: 560px) { header .sub { display: none; } header { padding: 10px 16px; } }
+
+  /* mandate panel */
+  .mandate { padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  .mandate h2, .timeline h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .rule .k { color: var(--muted); font-size: 12px; }
+  .rule .v { font-weight: 600; }
+  .bar { height: 6px; background: var(--soft); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--ok); transition: width .4s; }
+  .bar.over > div { background: var(--bad); }
+  .brands { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .brands span { background: var(--soft); border-radius: 10px; padding: 1px 8px; font-size: 12px; }
+
+  /* chat */
+  .left { display: flex; flex-direction: column; border-right: 1px solid var(--line); min-height: 0; }
+  .channel { padding: 10px 16px; font-weight: 600; border-bottom: 1px solid var(--line); background: var(--panel); }
+  .messages { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; min-height: 240px; }
+  .msg { display: flex; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 6px; flex: none; display: grid; place-items: center; font-weight: 700; color: #fff; }
+  .avatar.user { background: #4a7c59; }
+  .avatar.agent { background: var(--accent); color: var(--bg); }
+  .msg .name { font-weight: 700; }
+  .msg .name .tag { font-weight: 500; font-size: 11px; background: var(--soft); color: var(--muted); padding: 0 5px; border-radius: 4px; margin-left: 4px; }
+  .msg .time { color: var(--muted); font-size: 12px; margin-left: 6px; font-weight: 400; }
+  .msg .text { white-space: pre-wrap; }
+  .card { margin-top: 6px; border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 6px; padding: 10px 12px; background: var(--panel); }
+  .card .reasons { color: var(--warn); font-size: 13px; margin: 6px 0; padding-left: 18px; }
+  .card .actions { display: flex; gap: 8px; margin-top: 8px; }
+  .card .approve { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .card .deny { color: var(--bad); }
+  .card.decided { border-left-color: var(--muted); }
+  .card .verdict { font-weight: 600; margin-top: 6px; }
+  .typing { color: var(--muted); font-style: italic; font-size: 13px; }
+  .composer { border-top: 1px solid var(--line); padding: 10px 16px 14px; background: var(--panel); }
+  .samples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .samples button { font-size: 12px; padding: 3px 8px; border-radius: 12px; }
+  .composer form { display: flex; gap: 8px; }
+  .composer input { flex: 1; font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+
+  /* timeline */
+  .timeline { display: flex; flex-direction: column; min-height: 0; padding: 14px 16px 0; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .filters label { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 2px 8px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; user-select: none; }
+  .events { flex: 1; overflow-y: auto; padding-bottom: 16px; }
+  .ev { border-left: 3px solid var(--c); background: var(--panel); border-radius: 0 6px 6px 0; margin-bottom: 4px; }
+  .ev > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 28px 62px 150px 1fr; gap: 8px; align-items: baseline; padding: 6px 10px; }
+  .ev > summary::-webkit-details-marker { display: none; }
+  .ev .n { color: var(--muted); font-size: 12px; text-align: right; }
+  .badge { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--c); }
+  .ev .actor { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ev pre { margin: 0; padding: 8px 12px 12px 48px; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; color: var(--muted); border-top: 1px dashed var(--line); }
+  @media (max-width: 560px) { .ev > summary { grid-template-columns: 24px 54px 1fr; } .ev .actor { display: none; } }
+  .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>☕ Coffee Refiller</h1>
+  <span class="sub">Agentic purchasing over MCP · UCP · AP2</span>
+  <span class="spacer"></span>
+  <button id="seed" title="Record $70 of earlier orders this month">Seed $70 spent</button>
+  <button id="reset" title="New month, new timeline, re-signed mandates">Reset</button>
+</header>
+
+<div class="layout">
+  <section class="left">
+    <div class="mandate">
+      <h2>Your standing mandate (AP2)</h2>
+      <div class="rules">
+        <div class="rule"><div class="k">Per-order cap</div><div class="v" id="cap">–</div></div>
+        <div class="rule"><div class="k">Delivery deadline</div><div class="v" id="deadline">–</div></div>
+        <div class="rule" style="grid-column: 1 / -1">
+          <div class="k">This month: <span id="spent">–</span> of <span id="budget">–</span></div>
+          <div class="bar" id="bar"><div style="width:0"></div></div>
+        </div>
+        <div class="rule" style="grid-column: 1 / -1"><div class="k">Preferred brands (best → fallback)</div><div class="brands" id="brands"></div></div>
+      </div>
+    </div>
+    <div class="channel"># office-coffee</div>
+    <div class="messages" id="messages"><div class="empty" id="chat-empty">Post a message to start a reorder.</div></div>
+    <div class="composer">
+      <div class="samples">
+        <button data-text="Ugh, we're out of coffee again">Out of coffee</button>
+        <button data-text="We need 4 bags for the offsite next week">4 bags (over $40)</button>
+        <button data-text="Completely out and clients are in tomorrow morning, need coffee by tomorrow">By tomorrow</button>
+      </div>
+      <form id="form"><input id="input" placeholder="Message #office-coffee" autocomplete="off"><button>Send</button></form>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h2>Protocol timeline</h2>
+    <div class="filters" id="filters"></div>
+    <div class="events" id="events"><div class="empty" id="tl-empty">Every MCP, UCP, AP2 and Stripe message will appear here.</div></div>
+  </section>
+</div>
+
+<script>
+const PROTOCOLS = {
+  chat: "Chat", claude: "Claude", mcp: "MCP", ucp: "UCP", ap2: "AP2", stripe: "Stripe", policy: "Policy",
+};
+const $ = (id) => document.getElementById(id);
+const usd = (c) => `$${(c / 100).toFixed(2)}`;
+const time = (ts) => new Date(ts * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+const seen = new Set();
+const hidden = new Set();
+const cards = {};  // approval_id -> card element
+let typingEl = null;
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s ?? ""; return d.innerHTML; }
+
+async function api(path, body) {
+  const res = await fetch(path, { method: body === undefined ? "GET" : "POST", headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || res.statusText); }
+  return res.json();
+}
+
+async function refreshState() {
+  const s = await api("/api/state");
+  $("cap").textContent = usd(s.per_order_cap_cents) + " / order";
+  $("deadline").textContent = `${s.deadline_days} days`;
+  $("spent").textContent = usd(s.month_spend_cents);
+  $("budget").textContent = usd(s.monthly_budget_cents);
+  const pct = Math.min(100, (s.month_spend_cents / s.monthly_budget_cents) * 100);
+  $("bar").firstElementChild.style.width = pct + "%";
+  $("bar").classList.toggle("over", s.month_spend_cents > s.monthly_budget_cents);
+  $("brands").innerHTML = s.preferred_brands.map((b, i) => `<span>${i + 1}. ${esc(b)}</span>`).join("");
+  setTyping(s.busy);
+}
+
+// --- chat ---------------------------------------------------------------
+function addMessage(who, text, ts) {
+  $("chat-empty")?.remove();
+  const isAgent = who === "agent";
+  const el = document.createElement("div");
+  el.className = "msg";
+  el.innerHTML = `<div class="avatar ${who}">${isAgent ? "☕" : "Y"}</div>
+    <div><div class="name">${isAgent ? "Coffee Agent<span class=tag>BOT</span>" : "You"}<span class="time">${time(ts)}</span></div>
+    <div class="text">${esc(text)}</div></div>`;
+  $("messages").insertBefore(el, typingEl);
+  scrollChat();
+  return el;
+}
+
+function addApprovalCard(e) {
+  const p = e.payload;
+  const msg = addMessage("agent", e.summary, e.ts);
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<div><b>Approval needed:</b> ${esc(p.item)} from ${esc(p.merchant)} · <b>${esc(p.total)}</b> · arrives in ${p.delivery_days} days</div>
+    <ul class="reasons">${p.reasons.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>
+    <div class="k" style="color:var(--muted);font-size:12px">Approving signs a one-time AP2 mandate with your key, for exactly this checkout (expires in 15 min).</div>
+    <div class="actions"><button class="approve">Approve</button><button class="deny">Deny</button></div>`;
+  msg.querySelector(".text").after(card);
+  cards[p.approval_id] = card;
+  card.querySelector(".approve").onclick = () => decide(p.approval_id, true);
+  card.querySelector(".deny").onclick = () => decide(p.approval_id, false);
+  scrollChat();
+}
+
+async function decide(id, approved) {
+  cards[id].querySelectorAll("button").forEach((b) => (b.disabled = true));
+  try { await api(`/api/approvals/${id}`, { approved }); } catch (err) { alert(err.message); }
+}
+
+function markDecided(p) {
+  const card = cards[p.approval_id];
+  if (!card) return;
+  card.classList.add("decided");
+  card.querySelector(".actions").outerHTML = `<div class="verdict" style="color:var(--${p.approved ? "ok" : "bad"})">${p.approved ? "✓ Approved: one-time mandate signed" : "✕ Denied"}</div>`;
+}
+
+function setTyping(on) {
+  if (on && !typingEl) {
+    typingEl = document.createElement("div");
+    typingEl.className = "typing";
+    typingEl.textContent = "Coffee Agent is working…";
+    $("messages").appendChild(typingEl);
+    scrollChat();
+  } else if (!on && typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+function scrollChat() { const m = $("messages"); m.scrollTop = m.scrollHeight; }
+
+async function send(text) {
+  if (!text.trim()) return;
+  try { await api("/api/chat", { text }); $("input").value = ""; } catch (err) { alert(err.message); }
+}
+
+// --- timeline ---------------------------------------------------------------
+function addEvent(e) {
+  $("tl-empty")?.remove();
+  const el = document.createElement("details");
+  el.className = "ev";
+  el.dataset.protocol = e.protocol;
+  el.style.setProperty("--c", `var(--${e.protocol})`);
+  el.hidden = hidden.has(e.protocol);
+  el.innerHTML = `<summary><span class="n">${e.id}</span><span class="badge">${PROTOCOLS[e.protocol] || e.protocol}</span>
+    <span class="actor" title="${esc(e.actor)} · ${esc(e.kind)}">${esc(e.actor)}</span><span>${esc(e.summary)}</span></summary>
+    <pre>${esc(e.kind)}  ·  ${time(e.ts)}\n\n${esc(JSON.stringify(e.payload, null, 2))}</pre>`;
+  const box = $("events");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.appendChild(el);
+  if (atBottom) box.scrollTop = box.scrollHeight;
+}
+
+function buildFilters() {
+  $("filters").innerHTML = Object.entries(PROTOCOLS).map(([k, label]) =>
+    `<label style="--c:var(--${k})"><input type="checkbox" data-p="${k}" checked><span class="dot"></span>${label}</label>`).join("");
+  $("filters").querySelectorAll("input").forEach((cb) => cb.onchange = () => {
+    cb.checked ? hidden.delete(cb.dataset.p) : hidden.add(cb.dataset.p);
+    document.querySelectorAll(`.ev[data-protocol="${cb.dataset.p}"]`).forEach((el) => (el.hidden = !cb.checked));
+  });
+}
+
+// --- event stream -----------------------------------------------------------
+function handle(e) {
+  if (seen.has(e.id)) return;
+  seen.add(e.id);
+  addEvent(e);
+  if (e.protocol === "chat") {
+    if (e.kind === "message.user") { addMessage("user", e.payload.text, e.ts); setTyping(true); }
+    if (e.kind === "message.agent") { setTyping(false); addMessage("agent", e.payload.text, e.ts); }
+    if (e.kind === "approval.requested") addApprovalCard(e);
+    if (e.kind === "approval.decided") markDecided(e.payload);
+  }
+  if (["payment_intent.succeeded", "ledger.seeded"].includes(e.kind)) refreshState();
+}
+
+function connect() {
+  const source = new EventSource("/api/events");
+  source.onmessage = (m) => handle(JSON.parse(m.data));
+}
+
+$("form").onsubmit = (ev) => { ev.preventDefault(); send($("input").value); };
+document.querySelectorAll(".samples button").forEach((b) => (b.onclick = () => send(b.dataset.text)));
+$("seed").onclick = async () => { try { await api("/api/demo/spend", { cents: 7000 }); } catch (err) { alert(err.message); } };
+$("reset").onclick = async () => { try { await api("/api/demo/reset", {}); location.reload(); } catch (err) { alert(err.message); } };
+
+buildFilters();
+refreshState();
+connect();
+</script>
+</body>
+</html>

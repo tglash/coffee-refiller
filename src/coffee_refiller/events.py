@@ -61,6 +61,7 @@ class EventBus:
 
     def clear(self) -> None:
         self.history.clear()
+        self._ids = itertools.count(1)
 
 
 bus = EventBus()

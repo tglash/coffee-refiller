@@ -90,7 +90,7 @@ everything ──► event bus ──► SSE ──► dashboard                
 
 Design rule: **Claude chooses; code decides.** Prices come from what the merchant signed, never from Claude's text. Claude never handles mandates or JWTs; it passes short checkout ids, and code does the signing.
 
-## Honest caveats
+## Considerations
 
 - All actors run in one process, so your key and the agent's key sit side by side. Real AP2 keeps the user's key on the user's device; this *simulates* that boundary.
 - UCP's MCP binding isn't fully spec-exact: delivery estimates use an extension field, and the merchant's detached signature isn't JCS-canonicalized.

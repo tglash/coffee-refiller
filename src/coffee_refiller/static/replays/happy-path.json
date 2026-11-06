@@ -1,0 +1,1120 @@
+{
+ "scenario": "happy-path",
+ "title": "Out of coffee",
+ "recorded_at": "2026-11-06T16:47:19+00:00",
+ "model": "claude-sonnet-5-5",
+ "initial_state": {
+  "per_order_cap_cents": 4000,
+  "monthly_budget_cents": 8000,
+  "month_spend_cents": 0,
+  "preferred_brands": [
+   "Stumptown",
+   "Counter Culture",
+   "Lavazza",
+   "Folgers"
+  ],
+  "deadline_days": 3,
+  "merchants": [
+   "BeanCo Roasters",
+   "OfficeMart",
+   "GrocerGo"
+  ],
+  "busy": false
+ },
+ "events": [
+  {
+   "id": 2,
+   "ts": 1793983631.989911,
+   "actor": "user",
+   "protocol": "chat",
+   "kind": "message.user",
+   "summary": "Ugh, we're out of coffee again",
+   "payload": {
+    "text": "Ugh, we're out of coffee again"
+   }
+  },
+  {
+   "id": 3,
+   "ts": 1793983635.043881,
+   "actor": "agent",
+   "protocol": "claude",
+   "kind": "messages.create",
+   "summary": "Claude turn 1: search_catalog(beanco), search_catalog(officemart), search_catalog(grocergo)",
+   "payload": {
+    "stop_reason": "tool_use",
+    "usage": {
+     "input_tokens": 1732,
+     "output_tokens": 229
+    },
+    "thinking": null,
+    "reasoning": "",
+    "tool_calls": [
+     {
+      "name": "search_catalog",
+      "input": {
+       "merchant_id": "beanco",
+       "query": "coffee"
+      }
+     },
+     {
+      "name": "search_catalog",
+      "input": {
+       "merchant_id": "officemart",
+       "query": "coffee"
+      }
+     },
+     {
+      "name": "search_catalog",
+      "input": {
+       "merchant_id": "grocergo",
+       "query": "coffee"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": 4,
+   "ts": 1793983635.044172,
+   "actor": "agent",
+   "protocol": "mcp",
+   "kind": "tools/call",
+   "summary": "→ BeanCo Roasters: search_catalog",
+   "payload": {
+    "server": "merchant:beanco",
+    "tool": "search_catalog",
+    "arguments": {
+     "query": "coffee"
+    }
+   }
+  },
+  {
+   "id": 5,
+   "ts": 1793983635.044992,
+   "actor": "agent",
+   "protocol": "mcp",
+   "kind": "tools/call",
+   "summary": "→ OfficeMart: search_catalog",
+   "payload": {
+    "server": "merchant:officemart",
+    "tool": "search_catalog",
+    "arguments": {
+     "query": "coffee"
+    }
+   }
+  },
+  {
+   "id": 6,
+   "ts": 1793983635.0450659,
+   "actor": "agent",
+   "protocol": "mcp",
+   "kind": "tools/call",
+   "summary": "→ GrocerGo: search_catalog",
+   "payload": {
+    "server": "merchant:grocergo",
+    "tool": "search_catalog",
+    "arguments": {
+     "query": "coffee"
+    }
+   }
+  },
+  {
+   "id": 7,
+   "ts": 1793983635.109897,
+   "actor": "merchant:beanco",
+   "protocol": "mcp",
+   "kind": "tools/call.result",
+   "summary": "← BeanCo Roasters: search_catalog result",
+   "payload": {
+    "ucp": {
+     "version": "2026-01-11",
+     "status": "success"
+    },
+    "products": [
+     {
+      "id": "bc-stump-hb",
+      "title": "Stumptown Hair Bender, whole bean, 12 oz",
+      "description": {
+       "plain": "Stumptown coffee from BeanCo Roasters"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1800,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1800,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "bc-stump-hb",
+        "title": "Stumptown Hair Bender, whole bean, 12 oz",
+        "description": {
+         "plain": "Stumptown"
+        },
+        "price": {
+         "amount": 1800,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Stumptown",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 2
+      }
+     },
+     {
+      "id": "bc-cc-bt",
+      "title": "Counter Culture Big Trouble, whole bean, 12 oz",
+      "description": {
+       "plain": "Counter Culture coffee from BeanCo Roasters"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1600,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1600,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "bc-cc-bt",
+        "title": "Counter Culture Big Trouble, whole bean, 12 oz",
+        "description": {
+         "plain": "Counter Culture"
+        },
+        "price": {
+         "amount": 1600,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Counter Culture",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 2
+      }
+     }
+    ],
+    "merchant": {
+     "id": "beanco",
+     "name": "BeanCo Roasters"
+    }
+   }
+  },
+  {
+   "id": 8,
+   "ts": 1793983635.109968,
+   "actor": "merchant:officemart",
+   "protocol": "mcp",
+   "kind": "tools/call.result",
+   "summary": "← OfficeMart: search_catalog result",
+   "payload": {
+    "ucp": {
+     "version": "2026-01-11",
+     "status": "success"
+    },
+    "products": [
+     {
+      "id": "om-stump-hm",
+      "title": "Stumptown Holler Mountain, whole bean, 12 oz",
+      "description": {
+       "plain": "Stumptown coffee from OfficeMart"
+      },
+      "price_range": {
+       "min": {
+        "amount": 2100,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 2100,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "om-stump-hm",
+        "title": "Stumptown Holler Mountain, whole bean, 12 oz",
+        "description": {
+         "plain": "Stumptown"
+        },
+        "price": {
+         "amount": 2100,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Stumptown",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 4
+      }
+     },
+     {
+      "id": "om-lav-sc",
+      "title": "Lavazza Super Crema, whole bean, 2.2 lb",
+      "description": {
+       "plain": "Lavazza coffee from OfficeMart"
+      },
+      "price_range": {
+       "min": {
+        "amount": 2700,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 2700,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "om-lav-sc",
+        "title": "Lavazza Super Crema, whole bean, 2.2 lb",
+        "description": {
+         "plain": "Lavazza"
+        },
+        "price": {
+         "amount": 2700,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Lavazza",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 2
+      }
+     },
+     {
+      "id": "om-folg-cl",
+      "title": "Folgers Classic Roast, ground, 30.5 oz",
+      "description": {
+       "plain": "Folgers coffee from OfficeMart"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1400,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1400,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "om-folg-cl",
+        "title": "Folgers Classic Roast, ground, 30.5 oz",
+        "description": {
+         "plain": "Folgers"
+        },
+        "price": {
+         "amount": 1400,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Folgers",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 2
+      }
+     }
+    ],
+    "merchant": {
+     "id": "officemart",
+     "name": "OfficeMart"
+    }
+   }
+  },
+  {
+   "id": 9,
+   "ts": 1793983635.1101089,
+   "actor": "merchant:grocergo",
+   "protocol": "mcp",
+   "kind": "tools/call.result",
+   "summary": "← GrocerGo: search_catalog result",
+   "payload": {
+    "ucp": {
+     "version": "2026-01-11",
+     "status": "success"
+    },
+    "products": [
+     {
+      "id": "gg-stump-hb",
+      "title": "Stumptown Hair Bender, whole bean, 12 oz",
+      "description": {
+       "plain": "Stumptown coffee from GrocerGo"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1700,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1700,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "gg-stump-hb",
+        "title": "Stumptown Hair Bender, whole bean, 12 oz",
+        "description": {
+         "plain": "Stumptown"
+        },
+        "price": {
+         "amount": 1700,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Stumptown",
+      "in_stock": false,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 3
+      }
+     },
+     {
+      "id": "gg-cc-holo",
+      "title": "Counter Culture Hologram, whole bean, 12 oz",
+      "description": {
+       "plain": "Counter Culture coffee from GrocerGo"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1500,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1500,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "gg-cc-holo",
+        "title": "Counter Culture Hologram, whole bean, 12 oz",
+        "description": {
+         "plain": "Counter Culture"
+        },
+        "price": {
+         "amount": 1500,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Counter Culture",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 5
+      }
+     },
+     {
+      "id": "gg-folg-cl",
+      "title": "Folgers Classic Roast, ground, 30.5 oz",
+      "description": {
+       "plain": "Folgers coffee from GrocerGo"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1200,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1200,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "gg-folg-cl",
+        "title": "Folgers Classic Roast, ground, 30.5 oz",
+        "description": {
+         "plain": "Folgers"
+        },
+        "price": {
+         "amount": 1200,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Folgers",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 3
+      }
+     },
+     {
+      "id": "gg-sb-pp",
+      "title": "Starbucks Pike Place, ground, 28 oz",
+      "description": {
+       "plain": "Starbucks coffee from GrocerGo"
+      },
+      "price_range": {
+       "min": {
+        "amount": 1300,
+        "currency": "USD"
+       },
+       "max": {
+        "amount": 1300,
+        "currency": "USD"
+       }
+      },
+      "variants": [
+       {
+        "id": "gg-sb-pp",
+        "title": "Starbucks Pike Place, ground, 28 oz",
+        "description": {
+         "plain": "Starbucks"
+        },
+        "price": {
+         "amount": 1300,
+         "currency": "USD"
+        }
+       }
+      ],
+      "brand": "Starbucks",
+      "in_stock": true,
+      "fulfillment_estimate": {
+       "method": "shipping",
+       "delivery_days": 2
+      }
+     }
+    ],
+    "merchant": {
+     "id": "grocergo",
+     "name": "GrocerGo"
+    }
+   }
+  },
+  {
+   "id": 10,
+   "ts": 1793983636.5673091,
+   "actor": "agent",
+   "protocol": "claude",
+   "kind": "messages.create",
+   "summary": "Claude turn 2: create_checkout(beanco)",
+   "payload": {
+    "stop_reason": "tool_use",
+    "usage": {
+     "input_tokens": 2874,
+     "output_tokens": 161
+    },
+    "thinking": null,
+    "reasoning": "Best: Stumptown Hair Bender at beanco, $18, 2 days.",
+    "tool_calls": [
+     {
+      "name": "create_checkout",
+      "input": {
+       "merchant_id": "beanco",
+       "product_id": "bc-stump-hb",
+       "quantity": 1,
+       "deadline_days": 3
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": 11,
+   "ts": 1793983636.5675368,
+   "actor": "agent",
+   "protocol": "mcp",
+   "kind": "tools/call",
+   "summary": "→ BeanCo Roasters: create_checkout",
+   "payload": {
+    "server": "merchant:beanco",
+    "tool": "create_checkout",
+    "arguments": {
+     "product_id": "bc-stump-hb",
+     "quantity": 1,
+     "open_checkout_mandate": "eyJhbGciOiAiRVMyNTYiLCAi…(1378 chars)"
+    }
+   }
+  },
+  {
+   "id": 12,
+   "ts": 1793983636.573832,
+   "actor": "merchant:beanco",
+   "protocol": "ucp",
+   "kind": "checkout.created",
+   "summary": "BeanCo Roasters signed checkout chk_02942dbf9abfaa68: 1× Stumptown, $18.00",
+   "payload": {
+    "ucp": {
+     "version": "2026-01-11",
+     "status": "success"
+    },
+    "id": "chk_02942dbf9abfaa68",
+    "line_items": [
+     {
+      "id": "li_0",
+      "item": {
+       "id": "bc-stump-hb",
+       "title": "Stumptown Hair Bender, whole bean, 12 oz",
+       "price": 1800
+      },
+      "quantity": 1,
+      "totals": [
+       {
+        "type": "subtotal",
+        "amount": 1800
+       },
+       {
+        "type": "total",
+        "amount": 1800
+       }
+      ]
+     }
+    ],
+    "status": "ready_for_complete",
+    "currency": "USD",
+    "totals": [
+     {
+      "type": "subtotal",
+      "amount": 1800
+     },
+     {
+      "type": "total",
+      "amount": 1800
+     }
+    ],
+    "links": [
+     {
+      "type": "terms_of_service",
+      "url": "https://beanco.example/tos"
+     },
+     {
+      "type": "privacy_policy",
+      "url": "https://beanco.example/privacy"
+     }
+    ],
+    "merchant": {
+     "id": "beanco",
+     "name": "BeanCo Roasters",
+     "website": "beanco.example"
+    },
+    "fulfillment_estimate": {
+     "method": "shipping",
+     "delivery_days": 2
+    }
+   }
+  },
+  {
+   "id": 13,
+   "ts": 1793983636.576056,
+   "actor": "merchant:beanco",
+   "protocol": "mcp",
+   "kind": "tools/call.result",
+   "summary": "← BeanCo Roasters: create_checkout result",
+   "payload": {
+    "checkout": {
+     "ucp": {
+      "version": "2026-01-11",
+      "status": "success"
+     },
+     "id": "chk_02942dbf9abfaa68",
+     "line_items": [
+      {
+       "id": "li_0",
+       "item": {
+        "id": "bc-stump-hb",
+        "title": "Stumptown Hair Bender, whole bean, 12 oz",
+        "price": 1800
+       },
+       "quantity": 1,
+       "totals": [
+        {
+         "type": "subtotal",
+         "amount": 1800
+        },
+        {
+         "type": "total",
+         "amount": 1800
+        }
+       ]
+      }
+     ],
+     "status": "ready_for_complete",
+     "currency": "USD",
+     "totals": [
+      {
+       "type": "subtotal",
+       "amount": 1800
+      },
+      {
+       "type": "total",
+       "amount": 1800
+      }
+     ],
+     "links": [
+      {
+       "type": "terms_of_service",
+       "url": "https://beanco.example/tos"
+      },
+      {
+       "type": "privacy_policy",
+       "url": "https://beanco.example/privacy"
+      }
+     ],
+     "merchant": {
+      "id": "beanco",
+      "name": "BeanCo Roasters",
+      "website": "beanco.example"
+     },
+     "fulfillment_estimate": {
+      "method": "shipping",
+      "delivery_days": 2
+     },
+     "ap2": {
+      "merchant_authorization": "eyJhbGciOiAiRVMyNTYiLCAi…(163 chars)"
+     }
+    },
+    "checkout_jwt": "eyJhbGciOiAiRVMyNTYiLCAi…(1167 chars)"
+   }
+  },
+  {
+   "id": 14,
+   "ts": 1793983636.576143,
+   "actor": "policy",
+   "protocol": "policy",
+   "kind": "policy.ok",
+   "summary": "Policy: ok",
+   "payload": {
+    "checkout_id": "chk_02942dbf9abfaa68",
+    "decision": "ok",
+    "reasons": [],
+    "deadline_days": 3
+   }
+  },
+  {
+   "id": 15,
+   "ts": 1793983637.820978,
+   "actor": "agent",
+   "protocol": "claude",
+   "kind": "messages.create",
+   "summary": "Claude turn 3: complete_purchase(chk_02942dbf9abfaa68)",
+   "payload": {
+    "stop_reason": "tool_use",
+    "usage": {
+     "input_tokens": 3165,
+     "output_tokens": 67
+    },
+    "thinking": null,
+    "reasoning": "",
+    "tool_calls": [
+     {
+      "name": "complete_purchase",
+      "input": {
+       "checkout_id": "chk_02942dbf9abfaa68"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": 16,
+   "ts": 1793983637.8253682,
+   "actor": "agent",
+   "protocol": "ap2",
+   "kind": "mandate.checkout.closed",
+   "summary": "Agent signed closed checkout mandate for beanco",
+   "payload": {
+    "checkout_hash": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM",
+    "aud": "merchant:beanco",
+    "nonce": "chk_02942dbf9abfaa68"
+   }
+  },
+  {
+   "id": 17,
+   "ts": 1793983637.827181,
+   "actor": "agent",
+   "protocol": "ap2",
+   "kind": "mandate.payment.closed",
+   "summary": "Agent signed closed payment mandate: $18.00 to BeanCo Roasters",
+   "payload": {
+    "vct": "mandate.payment.1",
+    "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM",
+    "payee": {
+     "id": "beanco",
+     "name": "BeanCo Roasters",
+     "website": "beanco.example"
+    },
+    "pisp": null,
+    "payment_amount": {
+     "amount": 1800,
+     "currency": "USD"
+    },
+    "payment_instrument": {
+     "id": "pm_card_visa",
+     "type": "card",
+     "description": "Mock Stripe test card"
+    },
+    "execution_date": null,
+    "risk_data": null,
+    "iat": 1793983637,
+    "exp": 1793984537
+   }
+  },
+  {
+   "id": 18,
+   "ts": 1793983637.827253,
+   "actor": "processor",
+   "protocol": "stripe",
+   "kind": "POST /v1/payment_intents",
+   "summary": "Create PaymentIntent $18.00 → beanco",
+   "payload": {
+    "amount": 1800,
+    "currency": "USD",
+    "payee": "beanco",
+    "payment_method": "pm_card_visa",
+    "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM"
+   }
+  },
+  {
+   "id": 19,
+   "ts": 1793983637.831159,
+   "actor": "processor",
+   "protocol": "ap2",
+   "kind": "mandate.verified",
+   "summary": "AP2 payment mandate chain verified back to the user's key",
+   "payload": {
+    "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM"
+   }
+  },
+  {
+   "id": 20,
+   "ts": 1793983637.831617,
+   "actor": "processor",
+   "protocol": "stripe",
+   "kind": "payment_intent.created",
+   "summary": "pi_58e60b86914e22d0aa831ef4 requires_confirmation",
+   "payload": {
+    "object": "payment_intent",
+    "id": "pi_58e60b86914e22d0aa831ef4",
+    "amount": 1800,
+    "currency": "USD",
+    "payee": "beanco",
+    "payment_method": "pm_card_visa",
+    "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM",
+    "status": "requires_confirmation",
+    "created": 1793983637,
+    "last_payment_error": null,
+    "ap2_payment_receipt": null
+   }
+  },
+  {
+   "id": 21,
+   "ts": 1793983637.831805,
+   "actor": "agent",
+   "protocol": "mcp",
+   "kind": "tools/call",
+   "summary": "→ BeanCo Roasters: complete_checkout",
+   "payload": {
+    "server": "merchant:beanco",
+    "tool": "complete_checkout",
+    "arguments": {
+     "checkout_id": "chk_02942dbf9abfaa68",
+     "checkout_mandate": "eyJhbGciOiAiRVMyNTYiLCAi…(3760 chars)",
+     "payment_intent_id": "pi_58e60b86914e22d0aa831ef4"
+    }
+   }
+  },
+  {
+   "id": 22,
+   "ts": 1793983637.842838,
+   "actor": "merchant:beanco",
+   "protocol": "ap2",
+   "kind": "mandate.verified",
+   "summary": "Closed checkout mandate verified for chk_02942dbf9abfaa68",
+   "payload": {
+    "checkout_hash": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM"
+   }
+  },
+  {
+   "id": 23,
+   "ts": 1793983637.842858,
+   "actor": "processor",
+   "protocol": "stripe",
+   "kind": "POST /v1/payment_intents/pi_58e60b86914e22d0aa831ef4/confirm",
+   "summary": "merchant:beanco confirms pi_58e60b86914e22d0aa831ef4",
+   "payload": {
+    "intent": "pi_58e60b86914e22d0aa831ef4",
+    "confirmed_by": "merchant:beanco"
+   }
+  },
+  {
+   "id": 24,
+   "ts": 1793983637.845254,
+   "actor": "processor",
+   "protocol": "ap2",
+   "kind": "receipt.payment",
+   "summary": "Processor signed AP2 payment receipt",
+   "payload": {
+    "status": "Success",
+    "iss": "",
+    "iat": 1793983637,
+    "reference": "mxdXz6qACPUeVtCWcsYZ7tzOTxI6Wu6pki2Vi4tzV0c",
+    "payment_id": "95ff4ba2-c5a0-4c32-aa0b-7044921451b5",
+    "psp_confirmation_id": "95ff4ba2-c5a0-4c32-aa0b-7044921451b5",
+    "network_confirmation_id": "95ff4ba2-c5a0-4c32-aa0b-7044921451b5"
+   }
+  },
+  {
+   "id": 25,
+   "ts": 1793983637.8459892,
+   "actor": "processor",
+   "protocol": "stripe",
+   "kind": "payment_intent.succeeded",
+   "summary": "webhook: pi_58e60b86914e22d0aa831ef4 succeeded ($18.00)",
+   "payload": {
+    "object": "payment_intent",
+    "id": "pi_58e60b86914e22d0aa831ef4",
+    "amount": 1800,
+    "currency": "USD",
+    "payee": "beanco",
+    "payment_method": "pm_card_visa",
+    "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM",
+    "status": "succeeded",
+    "created": 1793983637,
+    "last_payment_error": null,
+    "ap2_payment_receipt": "eyJhbGciOiAiRVMyNTYiLCAidHlwIjogIkpXVCIsICJraWQiOiAicHJvY2Vzc29yIn0.eyJzdGF0dXMiOiAiU3VjY2VzcyIsICJpc3MiOiAiIiwgImlhdCI6IDE3OTM5ODM2MzcsICJyZWZlcmVuY2UiOiAibXhkWHo2cUFDUFVlVnRDV2NzWVo3dHpPVHhJNld1NnBraTJWaTR0elYwYyIsICJwYXltZW50X2lkIjogIjk1ZmY0YmEyLWM1YTAtNGMzMi1hYTBiLTcwNDQ5MjE0NTFiNSIsICJwc3BfY29uZmlybWF0aW9uX2lkIjogIjk1ZmY0YmEyLWM1YTAtNGMzMi1hYTBiLTcwNDQ5MjE0NTFiNSIsICJuZXR3b3JrX2NvbmZpcm1hdGlvbl9pZCI6ICI5NWZmNGJhMi1jNWEwLTRjMzItYWEwYi03MDQ0OTIxNDUxYjUifQ.xvZ2lBGqefiLq1P-34zzOFw3UwSkYwizuLNaaCqu20ZZH_44hy-DLKedT6-IEmTLjvYcQXbQjxK_XPk2dSo_qw"
+   },
+   "state": {
+    "per_order_cap_cents": 4000,
+    "monthly_budget_cents": 8000,
+    "month_spend_cents": 1800,
+    "preferred_brands": [
+     "Stumptown",
+     "Counter Culture",
+     "Lavazza",
+     "Folgers"
+    ],
+    "deadline_days": 3,
+    "merchants": [
+     "BeanCo Roasters",
+     "OfficeMart",
+     "GrocerGo"
+    ],
+    "busy": true
+   }
+  },
+  {
+   "id": 26,
+   "ts": 1793983637.8461518,
+   "actor": "merchant:beanco",
+   "protocol": "ap2",
+   "kind": "receipt.checkout",
+   "summary": "Merchant signed AP2 checkout receipt",
+   "payload": {
+    "status": "Success",
+    "iss": "beanco",
+    "iat": 1793983637,
+    "reference": "fRsMTKWw7yHDbN8VDjV_PmgVZue8tRlZPQxMYGfh0g8",
+    "order_id": "ord_77c49ae2a094"
+   }
+  },
+  {
+   "id": 27,
+   "ts": 1793983637.846157,
+   "actor": "merchant:beanco",
+   "protocol": "ucp",
+   "kind": "checkout.completed",
+   "summary": "Order ord_77c49ae2a094 placed with BeanCo Roasters",
+   "payload": {
+    "ucp": {
+     "version": "2026-01-11",
+     "status": "success"
+    },
+    "id": "chk_02942dbf9abfaa68",
+    "line_items": [
+     {
+      "id": "li_0",
+      "item": {
+       "id": "bc-stump-hb",
+       "title": "Stumptown Hair Bender, whole bean, 12 oz",
+       "price": 1800
+      },
+      "quantity": 1,
+      "totals": [
+       {
+        "type": "subtotal",
+        "amount": 1800
+       },
+       {
+        "type": "total",
+        "amount": 1800
+       }
+      ]
+     }
+    ],
+    "status": "completed",
+    "currency": "USD",
+    "totals": [
+     {
+      "type": "subtotal",
+      "amount": 1800
+     },
+     {
+      "type": "total",
+      "amount": 1800
+     }
+    ],
+    "links": [
+     {
+      "type": "terms_of_service",
+      "url": "https://beanco.example/tos"
+     },
+     {
+      "type": "privacy_policy",
+      "url": "https://beanco.example/privacy"
+     }
+    ],
+    "merchant": {
+     "id": "beanco",
+     "name": "BeanCo Roasters",
+     "website": "beanco.example"
+    },
+    "fulfillment_estimate": {
+     "method": "shipping",
+     "delivery_days": 2
+    },
+    "order": {
+     "id": "ord_77c49ae2a094",
+     "permalink_url": "https://beanco.example/orders/ord_77c49ae2a094"
+    }
+   }
+  },
+  {
+   "id": 28,
+   "ts": 1793983637.849718,
+   "actor": "merchant:beanco",
+   "protocol": "mcp",
+   "kind": "tools/call.result",
+   "summary": "← BeanCo Roasters: complete_checkout result",
+   "payload": {
+    "checkout": {
+     "ucp": {
+      "version": "2026-01-11",
+      "status": "success"
+     },
+     "id": "chk_02942dbf9abfaa68",
+     "line_items": [
+      {
+       "id": "li_0",
+       "item": {
+        "id": "bc-stump-hb",
+        "title": "Stumptown Hair Bender, whole bean, 12 oz",
+        "price": 1800
+       },
+       "quantity": 1,
+       "totals": [
+        {
+         "type": "subtotal",
+         "amount": 1800
+        },
+        {
+         "type": "total",
+         "amount": 1800
+        }
+       ]
+      }
+     ],
+     "status": "completed",
+     "currency": "USD",
+     "totals": [
+      {
+       "type": "subtotal",
+       "amount": 1800
+      },
+      {
+       "type": "total",
+       "amount": 1800
+      }
+     ],
+     "links": [
+      {
+       "type": "terms_of_service",
+       "url": "https://beanco.example/tos"
+      },
+      {
+       "type": "privacy_policy",
+       "url": "https://beanco.example/privacy"
+      }
+     ],
+     "merchant": {
+      "id": "beanco",
+      "name": "BeanCo Roasters",
+      "website": "beanco.example"
+     },
+     "fulfillment_estimate": {
+      "method": "shipping",
+      "delivery_days": 2
+     },
+     "order": {
+      "id": "ord_77c49ae2a094",
+      "permalink_url": "https://beanco.example/orders/ord_77c49ae2a094"
+     }
+    },
+    "ap2_checkout_receipt": "eyJhbGciOiAiRVMyNTYiLCAi…(362 chars)",
+    "payment_intent": {
+     "object": "payment_intent",
+     "id": "pi_58e60b86914e22d0aa831ef4",
+     "amount": 1800,
+     "currency": "USD",
+     "payee": "beanco",
+     "payment_method": "pm_card_visa",
+     "transaction_id": "C9KkkNjg66fCAJlk1cUvYiNBZdK8AiHub3emDyH0AoM",
+     "status": "succeeded",
+     "created": 1793983637,
+     "last_payment_error": null,
+     "ap2_payment_receipt": "eyJhbGciOiAiRVMyNTYiLCAi…(549 chars)"
+    }
+   }
+  },
+  {
+   "id": 29,
+   "ts": 1793983639.344866,
+   "actor": "agent",
+   "protocol": "claude",
+   "kind": "messages.create",
+   "summary": "Claude turn 4: final reply",
+   "payload": {
+    "stop_reason": "end_turn",
+    "usage": {
+     "input_tokens": 3352,
+     "output_tokens": 101
+    },
+    "thinking": null,
+    "reasoning": null,
+    "tool_calls": []
+   }
+  },
+  {
+   "id": 30,
+   "ts": 1793983639.344914,
+   "actor": "agent",
+   "protocol": "chat",
+   "kind": "message.agent",
+   "summary": "I ordered 1 bag of Stumptown Hair Bender (whole bean, 12 oz) from BeanCo for $18.00. It should arrive in 2 days, within the standard 3-day deadline. The order was under the $40 per-order cap and the monthly budget, so it went through without needing approval.",
+   "payload": {
+    "text": "I ordered 1 bag of Stumptown Hair Bender (whole bean, 12 oz) from BeanCo for $18.00. It should arrive in 2 days, within the standard 3-day deadline. The order was under the $40 per-order cap and the monthly budget, so it went through without needing approval."
+   }
+  }
+ ],
+ "branch": null
+}

@@ -2,6 +2,8 @@
 
 [![tests](https://github.com/tglash/coffee-refiller/actions/workflows/test.yml/badge.svg)](https://github.com/tglash/coffee-refiller/actions/workflows/test.yml)
 
+**▶ [Try the demo](https://tglash.github.io/coffee-refiller/)**: replays of live Claude runs, in your browser. No install or API key needed.
+
 A weekend learning prototype for **agentic purchasing**. Someone posts "we're out of coffee" in a Slack-style chat. A Claude-powered agent shops three mock merchants and buys within rules you signed. Every protocol message shows up on a live timeline:
 
 - **MCP**: how the agent talks to merchants (`tools/call`)
@@ -31,7 +33,15 @@ uv run coffee-refiller
 Open http://127.0.0.1:8000.
 
 ```bash
-uv run pytest          # 21 tests: policy + end-to-end protocol flows (no API key needed)
+uv run pytest          # policy, end-to-end protocol flows and replay files (no API key needed)
+```
+
+### Replay mode
+
+The hosted demo is this same dashboard with no server behind it. It plays back recorded live runs from `src/coffee_refiller/static/replays/`, and Approve/Deny branches into a separately recorded run. Locally, open http://127.0.0.1:8000/?replay. To re-record after changing the agent or the events (7 live Claude runs):
+
+```bash
+uv run python scripts/record_replays.py
 ```
 
 ## Your standing mandate (v1)

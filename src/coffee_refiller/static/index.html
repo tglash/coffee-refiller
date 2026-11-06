@@ -83,14 +83,22 @@
   @media (max-width: 560px) { .ev > summary { grid-template-columns: 24px 54px 1fr; } .ev .actor { display: none; } }
   .empty { color: var(--muted); padding: 24px 0; text-align: center; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
+
+  /* replay mode: same page, played back from recorded runs (no server) */
+  .replay-only { display: none; }
+  body.replay .replay-only { display: inline-block; }
+  body.replay .live-only { display: none; }
+  header .sub a { color: inherit; }
+  body.replay header .sub { color: var(--claude); }
 </style>
 </head>
 <body>
 <header>
   <h1>☕ Coffee Refiller</h1>
-  <span class="sub">Agentic purchasing over MCP · UCP · AP2</span>
+  <span class="sub" id="sub">Agentic purchasing over MCP · UCP · AP2</span>
   <span class="spacer"></span>
-  <button id="seed" title="Record $70 of earlier orders this month">Seed $70 spent</button>
+  <button id="speed" class="replay-only" title="Playback speed">Speed 1×</button>
+  <button id="seed" class="live-only" title="Record $70 of earlier orders this month">Seed $70 spent</button>
   <button id="reset" title="New month, new timeline, re-signed mandates">Reset</button>
 </header>
 
@@ -112,9 +120,10 @@
     <div class="messages" id="messages"><div class="empty" id="chat-empty">Post a message to start a reorder.</div></div>
     <div class="composer">
       <div class="samples">
-        <button data-text="Ugh, we're out of coffee again">Out of coffee</button>
-        <button data-text="We need 4 bags for the offsite next week">4 bags (over $40)</button>
-        <button data-text="Completely out and clients are in tomorrow morning, need coffee by tomorrow">By tomorrow</button>
+        <button data-scenario="happy-path" data-text="Ugh, we're out of coffee again">Out of coffee</button>
+        <button data-scenario="over-cap" data-text="We need 4 bags for the offsite next week">4 bags (over $40)</button>
+        <button data-scenario="over-budget" class="replay-only">Over budget ($70 spent)</button>
+        <button data-scenario="by-tomorrow" data-text="Completely out and clients are in tomorrow morning, need coffee by tomorrow">By tomorrow</button>
       </div>
       <form id="form"><input id="input" placeholder="Message #office-coffee" autocomplete="off"><button>Send</button></form>
     </div>
@@ -147,8 +156,9 @@ async function api(path, body) {
   return res.json();
 }
 
-async function refreshState() {
-  const s = await api("/api/state");
+async function refreshState() { applyState(await api("/api/state")); }
+
+function applyState(s) {
   $("cap").textContent = usd(s.per_order_cap_cents) + " / order";
   $("deadline").textContent = `${s.deadline_days} days`;
   $("spent").textContent = usd(s.month_spend_cents);
@@ -192,6 +202,7 @@ function addApprovalCard(e) {
 
 async function decide(id, approved) {
   cards[id].querySelectorAll("button").forEach((b) => (b.disabled = true));
+  if (REPLAY) return replay.choose(approved);
   try { await api(`/api/approvals/${id}`, { approved }); } catch (err) { alert(err.message); }
 }
 
@@ -256,7 +267,8 @@ function handle(e) {
     if (e.kind === "approval.requested") addApprovalCard(e);
     if (e.kind === "approval.decided") markDecided(e.payload);
   }
-  if (["payment_intent.succeeded", "ledger.seeded"].includes(e.kind)) refreshState();
+  // Recorded events carry the state snapshot taken when they happened.
+  if (["payment_intent.succeeded", "ledger.seeded"].includes(e.kind)) e.state ? applyState(e.state) : refreshState();
 }
 
 function connect() {
@@ -264,14 +276,83 @@ function connect() {
   source.onmessage = (m) => handle(JSON.parse(m.data));
 }
 
-$("form").onsubmit = (ev) => { ev.preventDefault(); send($("input").value); };
-document.querySelectorAll(".samples button").forEach((b) => (b.onclick = () => send(b.dataset.text)));
-$("seed").onclick = async () => { try { await api("/api/demo/spend", { cents: 7000 }); } catch (err) { alert(err.message); } };
-$("reset").onclick = async () => { try { await api("/api/demo/reset", {}); location.reload(); } catch (err) { alert(err.message); } };
+// --- replay mode --------------------------------------------------------------
+// With no server (e.g. GitHub Pages), play back recorded live runs through the
+// same handle(). Recordings come from scripts/record_replays.py.
+let REPLAY = false;
+const MAX_GAP = 1.5;  // seconds; Claude's thinking time is dead air in a replay
 
-buildFilters();
-refreshState();
-connect();
+const replay = {
+  doc: null, queue: [], timer: null, last: null, speed: 1,
+
+  async play(name) {
+    clearTimeout(this.timer);
+    const res = await fetch(`replays/${name}.json`);
+    if (!res.ok) { alert(`Recording "${name}" not found.`); return; }
+    this.doc = await res.json();
+    clearUI();
+    const when = new Date(this.doc.recorded_at).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+    $("sub").innerHTML = `Replay of live Claude runs (${esc(this.doc.model)}, recorded ${when}) · <a href="https://github.com/tglash/coffee-refiller" target="_blank" rel="noopener">View code ↗</a>`;
+    applyState(this.doc.initial_state);
+    this.run(this.doc.events);
+  },
+
+  run(events) { this.queue = events.slice(); this.last = null; this.next(); },
+
+  next() {
+    const e = this.queue.shift();
+    if (!e) return;  // finished, or paused on an approval card until choose()
+    const gap = this.last === null ? 0.3 : Math.min(MAX_GAP, Math.max(0, e.ts - this.last));
+    this.timer = setTimeout(() => { this.last = e.ts; handle(e); this.next(); }, (gap * 1000) / this.speed);
+  },
+
+  choose(approved) { if (this.doc?.branch) this.run(this.doc.branch[approved ? "approve" : "deny"]); },
+};
+
+function clearUI() {
+  seen.clear();
+  for (const id in cards) delete cards[id];
+  typingEl = null;
+  $("messages").innerHTML = "";
+  $("events").innerHTML = "";
+}
+
+async function detectReplay() {
+  if (new URLSearchParams(location.search).has("replay")) return true;
+  try { return !(await fetch("api/state")).ok; } catch { return true; }
+}
+
+async function start() {
+  buildFilters();
+  REPLAY = await detectReplay();
+  document.querySelectorAll(".samples button").forEach((b) =>
+    (b.onclick = () => (REPLAY ? replay.play(b.dataset.scenario) : send(b.dataset.text))));
+
+  if (!REPLAY) {
+    $("form").onsubmit = (ev) => { ev.preventDefault(); send($("input").value); };
+    $("seed").onclick = async () => { try { await api("/api/demo/spend", { cents: 7000 }); } catch (err) { alert(err.message); } };
+    $("reset").onclick = async () => { try { await api("/api/demo/reset", {}); location.reload(); } catch (err) { alert(err.message); } };
+    refreshState();
+    connect();
+    return;
+  }
+
+  document.body.classList.add("replay");
+  $("input").disabled = true;
+  $("form").querySelector("button").disabled = true;
+  $("input").placeholder = "Replay: pick a scenario above (run locally to chat live)";
+  $("reset").textContent = "Restart";
+  $("reset").title = "Replay this scenario from the start";
+  $("reset").onclick = () => replay.doc && replay.play(replay.doc.scenario);
+  $("speed").onclick = () => {
+    replay.speed = replay.speed === 1 ? 3 : 1;
+    $("speed").textContent = `Speed ${replay.speed}×`;
+  };
+  const wanted = new URLSearchParams(location.search).get("replay");
+  replay.play(wanted || "happy-path");
+}
+
+start();
 </script>
 </body>
 </html>

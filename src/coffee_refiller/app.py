@@ -11,6 +11,7 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 STATIC = Path(__file__).parent / "static"
@@ -24,6 +25,8 @@ from coffee_refiller.processor import MockStripe  # noqa: E402
 from coffee_refiller.settings import SETTINGS  # noqa: E402
 
 app = FastAPI(title="Coffee Refiller")
+# Recorded runs for replay mode (open /?replay); see scripts/record_replays.py.
+app.mount("/replays", StaticFiles(directory=STATIC / "replays", check_dir=False), name="replays")
 _tasks: set[asyncio.Task[None]] = set()  # keep background runs referenced until done
 
 

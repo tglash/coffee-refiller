@@ -1,5 +1,7 @@
 # ☕ Coffee Refiller
 
+[![tests](https://github.com/tglash/coffee-refiller/actions/workflows/test.yml/badge.svg)](https://github.com/tglash/coffee-refiller/actions/workflows/test.yml)
+
 A weekend learning prototype for **agentic purchasing**. Someone posts "we're out of coffee" in a Slack-style chat. A Claude-powered agent shops three mock merchants and buys within rules you signed. Every protocol message shows up on a live timeline:
 
 - **MCP**: how the agent talks to merchants (`tools/call`)

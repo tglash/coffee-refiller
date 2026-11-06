@@ -9,6 +9,8 @@ A weekend learning prototype for **agentic purchasing**. Someone posts "we're ou
 
 Nothing here is real: the merchants, money and keys are all mocks. Claude is real.
 
+> Independent learning project. Not affiliated with or endorsed by Google, Shopify, Anthropic, Stripe or any coffee brand named here. Brand names appear only as mock catalog data.
+
 ## Setup
 
 Requires [uv](https://docs.astral.sh/uv/) (`brew install uv`) and an Anthropic API key.
@@ -84,3 +86,7 @@ Design rule: **Claude chooses; code decides.** Prices come from what the merchan
 
 - [docs/plans/agentic-coffee-reorder.md](docs/plans/agentic-coffee-reorder.md): the build plan and decisions
 - [docs/sdk-notes.md](docs/sdk-notes.md): what AP2 V2, UCP and MCP 2.x actually look like
+
+## License
+
+MIT. See [LICENSE](LICENSE).

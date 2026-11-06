@@ -1,6 +1,6 @@
 # Feature Implementation Plan: Replay Mode (v1)
 
-**Overall Progress:** `85%`
+**Overall Progress:** `100%`
 
 ## TLDR
 A hosted, clickable version of the dashboard that needs no backend and no API key. We record real Claude runs of the demo scenarios as JSON, and the same `index.html` plays them back when no server is present. Deployed as a static site. Issue: [replay-mode.md](../issues/replay-mode.md).
@@ -53,9 +53,9 @@ File shape: `{ scenario, title, recorded_at, model, initial_state, events: [...]
   - [x] 🟩 Enable Pages (source: GitHub Actions) in the repo settings
   - [x] 🟩 README: a "▶ Try the demo" link at the top
 
-- [ ] 🟥 **Step 6: Hero GIF** (after the site is live)
-  - [ ] 🟥 Screen-record the happy path in replay at 3× (Cmd-Shift-5), then convert it to an optimized GIF with `ffmpeg` (`brew install ffmpeg`)
-  - [ ] 🟥 Add the GIF to the top of the README
+- [x] 🟩 **Step 6: Hero GIF** (after the site is live)
+  - [x] 🟩 Screen-record the happy path in replay at 3× (Cmd-Shift-5), then convert it to an optimized GIF with `ffmpeg` (`brew install ffmpeg`)
+  - [x] 🟩 Add the GIF to the top of the README
 
 ## Risks
 - **Drift:** recordings go stale when the `Event` shape or UI changes. The Step 4 tests catch shape drift. Re-recording is one command.

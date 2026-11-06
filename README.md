@@ -4,6 +4,8 @@
 
 **▶ [Try the demo](https://tglash.github.io/coffee-refiller/)**: replays of live Claude runs, in your browser. No install or API key needed.
 
+[![Replay: the agent hits the $40 cap, asks for approval, and pays under a one-time AP2 mandate](docs/assets/demo.gif)](https://tglash.github.io/coffee-refiller/?replay=over-cap)
+
 A weekend learning prototype for **agentic purchasing**. Someone posts "we're out of coffee" in a Slack-style chat. A Claude-powered agent shops three mock merchants and buys within rules you signed. Every protocol message shows up on a live timeline:
 
 - **MCP**: how the agent talks to merchants (`tools/call`)

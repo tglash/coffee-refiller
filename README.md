@@ -46,7 +46,7 @@ The hosted demo is this same dashboard with no server behind it. It plays back r
 uv run python scripts/record_replays.py
 ```
 
-## Your standing mandate (v1)
+## Standing mandate (v1)
 
 | Rule | Enforced by |
 |---|---|
